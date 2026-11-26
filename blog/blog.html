@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CR7 – The Legend</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#101010;color:white;font-family:Arial,sans-serif}
+header{background:#080808;padding:25px 8%;border-bottom:2px solid #c9a227}
+.logo{font-size:32px;font-weight:900;color:#d5b13c}
+nav{margin-top:18px}
+nav a{color:white;text-decoration:none;margin-right:22px}
+.hero{padding:100px 8%;background:linear-gradient(90deg,#000d,#0005),url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1600') center/cover}
+.hero h1{font-size:55px;color:#e2bd50;margin:0}
+.hero p{font-size:19px}
+button{background:#c9a227;color:#111;border:0;padding:12px 20px;cursor:pointer;font-weight:bold;border-radius:4px}
+main{padding:40px 8%;min-height:350px}
+h2{color:#d8b443}
+.posts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px}
+.post{background:#1c1c1c;border:1px solid #393939;border-radius:8px;overflow:hidden}
+.post img{width:100%;height:190px;object-fit:cover}
+.post-content{padding:20px}
+.post h3{color:#e4c45e}
+#admin{display:none;background:#202020;padding:25px;border:1px solid #c9a227;border-radius:8px;margin-bottom:30px}
+input,textarea{width:100%;padding:12px;margin:8px 0 15px;background:#111;color:white;border:1px solid #555;border-radius:4px}
+textarea{min-height:180px;font-family:monospace}
+footer{text-align:center;background:#080808;padding:30px;color:#aaa}
+.small{color:#aaa;font-size:13px}
+.delete{background:#a52b2b;color:white;margin-top:10px}
+</style>
+</head>
+<body>
+
+<header>
+<div class="logo">CR7 – THE LEGEND</div>
+<nav>
+<a href="#">Strona główna</a>
+<a href="#wpisy">Aktualności</a>
+<a href="#admin-login">Administrator</a>
+</nav>
+</header>
+
+<section class="hero">
+<h1>CRISTIANO RONALDO</h1>
+<p>Historia legendy. Rekordy. Sukcesy. Piłkarska pasja.</p>
+<button onclick="document.getElementById('wpisy').scrollIntoView()">Czytaj artykuły</button>
+</section>
+
+<main>
+<div id="admin">
+<h2>⚙ PANEL ADMINISTRATORA</h2>
+<p class="small">Dodawaj artykuły, wpisując własny kod HTML.</p>
+<label>Tytuł wpisu</label>
+<input id="title" placeholder="Tytuł artykułu">
+
+<label>Adres zdjęcia (URL)</label>
+<input id="photo" placeholder="https://...">
+
+<label>Treść wpisu HTML</label>
+<textarea id="content" placeholder="<h2>Nowy artykuł</h2><p>Treść artykułu...</p>"></textarea>
+
+<button onclick="addPost()">OPUBLIKUJ WPIS</button>
+<button onclick="logout()">WYLOGUJ</button>
+</div>
+
+<section id="admin-login">
+<h2>Panel administratora</h2>
+<input id="password" type="password" placeholder="Hasło administratora">
+<button onclick="login()">ZALOGUJ</button>
+</section>
+
+<h2 id="wpisy">NAJNOWSZE ARTYKUŁY</h2>
+<div class="posts" id="posts"></div>
+</main>
+
+<footer>
+CR7 – THE LEGEND | Blog o Cristiano Ronaldo
+</footer>
+
+<script>
+const ADMIN_PASSWORD = "CR7admin";
+let articles = JSON.parse(localStorage.getItem("cr7_posts") || "[]");
+
+function render(){
+ const area=document.getElementById("posts");
+ area.innerHTML="";
+ articles.forEach((p,i)=>{
+ const div=document.createElement("article");
+ div.className="post";
+ div.innerHTML=`
+ ${p.photo ? '<img src="'+p.photo.replace(/"/g,'&quot;')+'" alt="Zdjęcie artykułu">' : ''}
+ <div class="post-content">
+ <h3></h3>
+ <div class="article-body"></div>
+ ${sessionStorage.getItem("cr7_admin")==="yes" ?
+ '<button class="delete" onclick="deletePost('+i+')">USUŃ WPIS</button>' : ''}
+ </div>`;
+ div.querySelector("h3").textContent=p.title;
+ div.querySelector(".article-body").innerHTML=p.content;
+ area.appendChild(div);
+ });
+}
+function save(){
+ localStorage.setItem("cr7_posts",JSON.stringify(articles));
+ render();
+}
+function login(){
+ if(document.getElementById("password").value===ADMIN_PASSWORD){
+ sessionStorage.setItem("cr7_admin","yes");
+ document.getElementById("admin").style.display="block";
+ document.getElementById("admin-login").style.display="none";
+ render();
+ }else alert("Nieprawidłowe hasło!");
+}
+function logout(){
+ sessionStorage.removeItem("cr7_admin");
+ document.getElementById("admin").style.display="none";
+ document.getElementById("admin-login").style.display="block";
+ render();
+}
+function addPost(){
+ const title=document.getElementById("title").value.trim();
+ const photo=document.getElementById("photo").value.trim();
+ const content=document.getElementById("content").value;
+ if(!title||!content){alert("Uzupełnij tytuł i treść!");return;}
+ articles.unshift({title,photo,content});
+ save();
+ document.getElementById("title").value="";
+ document.getElementById("photo").value="";
+ document.getElementById("content").value="";
+ alert("Wpis został dodany!");
+}
+function deletePost(i){
+ if(confirm("Czy na pewno usunąć wpis?")){
+ articles.splice(i,1);
+ save();
+ }
+}
+render();
+if(sessionStorage.getItem("cr7_admin")==="yes"){
+ document.getElementById("admin").style.display="block";
+ document.getElementById("admin-login").style.display="none";
+}
+</script>
+</body>
+</html>
